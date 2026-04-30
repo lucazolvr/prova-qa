@@ -1,44 +1,45 @@
 # Projeto de prova de automação QA
 
-Repositório único, em português brasileiro, para a prova de testes e qualidade de software. A proposta reúne duas frentes no mesmo projeto:
+Repositório único, em português brasileiro, para a prova de testes e qualidade de software.
+
+O projeto entrega:
 
 - automação de API do Swagger Petstore com Postman/Newman
 - automação web E2E do SauceDemo com Python e Selenium
+- pipeline GitHub Actions para as duas frentes
+- organização pensada para apresentação em aula
 
-Neste momento, o projeto já possui as duas automações principais executáveis localmente e uma pipeline GitHub Actions preparada para rodar ambas. Falta o acabamento final de documentação, evidências e narrativa de apresentação.
+## Visão geral
 
-## Objetivo da prova
+Este trabalho foi estruturado para atender ao enunciado da prova com foco em três pontos:
 
-Entregar um projeto apresentável que permita:
+1. **execução real** das automações API e web
+2. **legibilidade** do repositório e do fluxo de testes
+3. **explicabilidade** na apresentação
 
-- organizar API, web e CI no mesmo repositório
-- implementar a suíte de API para User, Store e Pet
-- implementar o fluxo E2E do SauceDemo com login, carrinho e checkout
-- integrar as duas frentes ao GitHub Actions
-- explicar a solução em aula com estrutura legível e comandos previsíveis
+As duas frentes vivem no mesmo repositório, com comandos previsíveis, CI separado por job e documentação alinhada ao estado real do código.
 
-## Estado atual
+## Tecnologias usadas
 
-No estado atual, o projeto já possui:
+### API
 
-- estrutura única para API, web e CI
-- collection Postman da Petstore em `api/postman/petstore_collection.json`
-- execução local da suíte de API por `npm run api:test`
-- suíte web Selenium em Python com Page Objects dentro de `web/`
-- execução local do fluxo E2E web por `python -m pytest web/tests/test_checkout_e2e.py -q`
-- workflow GitHub Actions em `.github/workflows/ci.yml`
-- `package.json` com dependência de Newman e scripts da frente API
-- `requirements.txt` com a stack da frente web
-- `.env.example` com configuração de ambiente da automação web
+- Postman
+- Newman
+- Node.js
 
-Ainda **não** existem nesta etapa:
+### Web
 
-- README final com evidências visuais da execução
-- narrativa final de apresentação e troubleshooting consolidado
+- Python 3
+- Selenium
+- webdriver-manager
+- python-dotenv
+- pytest
 
-Esses itens entram na próxima slice.
+### CI
 
-## Estrutura do repositório
+- GitHub Actions
+
+## Estrutura do projeto
 
 ```text
 .
@@ -68,60 +69,45 @@ Esses itens entram na próxima slice.
 └── README.md
 ```
 
-## Stacks e convenções escolhidas
+## O que foi automatizado
 
-### API
+### API — Swagger Petstore
 
-- Postman para modelagem e export da collection
-- Newman para execução local e execução no CI
-- collection localizada em `api/postman/petstore_collection.json`
-- ambiente local em `api/postman/petstore_environment.json`
+Collection em:
 
-Cobertura atual da suíte API:
+- `api/postman/petstore_collection.json`
 
-- **Pet**: listagem por status com validação de status code e formato da resposta
-- **Store**: consulta de inventário com validação de objeto retornado
-- **User**: login e logout com validação de sessão e encerramento
+Cobertura atual:
 
-Comando disponível:
+- **Pet**: listagem por status
+- **Store**: consulta de inventário
+- **User**: login e logout
 
-```bash
-npm run api:test
-```
+A suíte foi mantida em cenários representativos e mais estáveis da API pública para reduzir falsos negativos em demonstração e CI.
 
-### Web
+### Web — SauceDemo
 
-- Python
-- Selenium
-- `webdriver-manager`
-- `python-dotenv`
-- `pytest`
-- Page Objects para separar login, inventário, carrinho e checkout
-- waits explícitos nas transições principais do fluxo
+Teste em:
 
-Cobertura atual da suíte web:
+- `web/tests/test_checkout_e2e.py`
 
-- login com usuário de treino
+Fluxo coberto:
+
+- login com `standard_user`
 - adição do produto `Sauce Labs Backpack` ao carrinho
 - acesso ao carrinho
 - checkout com preenchimento de dados
-- finalização com confirmação de pedido
+- finalização do pedido
 
-Comando disponível:
+A automação usa **Page Objects** e **waits explícitos**, seguindo o guia da disciplina.
 
-```bash
-python -m pytest web/tests/test_checkout_e2e.py -q
-```
+## Configuração do ambiente
 
-## Configuração por ambiente
-
-O projeto segue o padrão de configuração fora do código-fonte.
-
-Arquivo disponível:
+Arquivo base:
 
 - `.env.example`
 
-Variáveis previstas para a automação web:
+Variáveis disponíveis:
 
 ```env
 BASE_URL=https://www.saucedemo.com/
@@ -134,70 +120,173 @@ IMPLICIT_WAIT_SECONDS=0
 EXPLICIT_WAIT_SECONDS=10
 ```
 
-Para uso local, copie `.env.example` para `.env` se quiser customizar valores. O arquivo real `.env` não deve ser versionado.
+Se quiser customizar valores localmente:
 
-## Integração contínua com GitHub Actions
+1. copie `.env.example` para `.env`
+2. ajuste o que precisar
 
-A pipeline está definida em:
+O arquivo `.env` **não deve ser versionado**.
 
-- `.github/workflows/ci.yml`
+## Instalação
 
-Jobs atuais:
-
-- **API - Newman Petstore**
-- **Web - Selenium SauceDemo**
-
-A proposta do workflow é simples:
-
-- o job de API faz checkout, instala Node e executa `npm ci` + `npm run api:test`
-- o job web faz checkout, instala Python, instala Google Chrome no runner e executa `python -m pip install -r requirements.txt` + `python -m pytest web/tests/test_checkout_e2e.py -q`
-
-Isso deixa claro na aba Actions qual frente falhou: API ou web.
-
-## Comandos disponíveis
-
-### API
-
-Instalar dependências Node:
+### Dependências da API
 
 ```bash
 npm install
 ```
 
-Executar a suíte de API:
-
-```bash
-npm run api:test
-```
-
-A saída do Newman mostra o grupo, o request e a asserção que falhou, o que facilita a explicação em aula e o diagnóstico local.
-
-### Web
-
-Instalar dependências Python:
+### Dependências da automação web
 
 ```bash
 python -m pip install -r requirements.txt
 ```
 
-Executar a suíte web:
+## Execução local
+
+### Rodar automação API
+
+```bash
+npm run api:test
+```
+
+### Rodar automação web
 
 ```bash
 python -m pytest web/tests/test_checkout_e2e.py -q
 ```
 
-Se quiser visualizar o navegador durante a execução, ajuste `HEADLESS=false` no `.env`.
+### Rodar as duas frentes antes da apresentação
 
-## Próxima entrega prevista
+```bash
+npm run api:test
+python -m pytest web/tests/test_checkout_e2e.py -q
+```
 
-- **S05**: README final, evidências e acabamento para apresentação
+## Integração contínua
 
-## Observações para apresentação
+Workflow:
 
-- O repositório foi estruturado para ficar simples de explicar em aula.
-- A separação entre API, web e CI é intencional para reduzir confusão.
-- Comentários no código foram mantidos no mínimo; a legibilidade vem da estrutura e dos nomes.
-- O histórico incremental de commits continua sendo tratado como parte do entregável.
-- A suíte API prioriza cenários representativos e estáveis para reduzir dependência de comportamento inconsistente da Petstore pública.
-- A suíte web usa Page Objects e waits explícitos para aderir ao guia da disciplina e reduzir flakiness.
-- A pipeline usa os mesmos comandos já validados localmente, reduzindo diferença entre máquina de desenvolvimento e CI.
+- `.github/workflows/ci.yml`
+
+Jobs configurados:
+
+- `api-tests`
+- `web-tests`
+
+Resumo:
+
+- o job de API executa `npm ci` e `npm run api:test`
+- o job de web instala Python, instala Chrome no runner e executa `python -m pytest web/tests/test_checkout_e2e.py -q`
+
+A separação por job ajuda a identificar rapidamente se a falha veio da frente API ou da frente web.
+
+## Evidências
+
+### Evidência da suíte API
+
+Comando validado localmente:
+
+```bash
+npm run api:test
+```
+
+Resultado esperado:
+
+- requests dos grupos `Pet`, `Store` e `User`
+- asserções verdes no Newman
+- sumário final com zero falhas
+
+Na validação final local deste projeto, a suíte API passou com:
+
+- 4 requests executados
+- 10 asserções verdes
+- 0 falhas
+
+### Evidência da suíte web
+
+Comando validado localmente:
+
+```bash
+python -m pytest web/tests/test_checkout_e2e.py -q
+```
+
+Resultado esperado:
+
+- 1 teste passando
+- fluxo completo de login, carrinho e checkout executado sem erro
+
+Durante a estabilização final do projeto, esse teste foi executado repetidamente até ficar estável no ambiente local atual.
+
+### Evidência da pipeline
+
+Arquivo do workflow:
+
+- `.github/workflows/ci.yml`
+
+O workflow usa os mesmos comandos já validados localmente. Isso reduz a diferença entre execução manual e CI.
+
+## Troubleshooting
+
+### 1. API falhou no Newman
+
+Possíveis causas:
+
+- instabilidade momentânea da Petstore pública
+- timeout temporário do serviço
+- mudança de comportamento em endpoint público
+
+O que fazer:
+
+- rodar `npm run api:test` novamente
+- verificar no terminal qual grupo/request falhou
+- confirmar se a falha veio da API pública e não do projeto
+
+### 2. Web falhou no Selenium
+
+Possíveis causas:
+
+- instabilidade momentânea do SauceDemo
+- problema local com browser/driver
+- diferença de ambiente em modo headless
+
+O que fazer:
+
+- rodar `python -m pytest web/tests/test_checkout_e2e.py -q` novamente
+- se precisar observar visualmente, definir `HEADLESS=false` no `.env`
+- verificar se o browser está instalado corretamente
+
+### 3. CI falhou no GitHub Actions
+
+O que verificar:
+
+- qual job falhou: `api-tests` ou `web-tests`
+- se o erro ocorreu no Newman ou no pytest
+- se a falha foi de serviço externo ou de configuração do projeto
+
+## Pontos fortes para explicar em aula
+
+- repositório único para API, web e CI
+- uso de Postman/Newman conforme o guia de API
+- uso de Python + Selenium + Page Objects + waits explícitos conforme o guia web
+- pipeline separada por jobs para leitura rápida de falhas
+- histórico incremental de commits durante a evolução do trabalho
+
+## Apresentação
+
+Sugestão de roteiro curto:
+
+1. mostrar a estrutura do repositório
+2. abrir a collection da Petstore e explicar os grupos `Pet`, `Store` e `User`
+3. mostrar o teste web e os Page Objects
+4. executar localmente:
+   - `npm run api:test`
+   - `python -m pytest web/tests/test_checkout_e2e.py -q`
+5. abrir `.github/workflows/ci.yml` e explicar os dois jobs
+6. encerrar mostrando que README, código e pipeline estão alinhados
+
+## Observações finais
+
+- comentários foram mantidos no mínimo, priorizando nomes e estrutura claros
+- a suíte API prioriza cenários representativos e mais estáveis da API pública
+- a suíte web exigiu estabilização específica no checkout antes de sustentar o CI
+- a documentação foi mantida fiel ao estado real do projeto, sem prometer o que não existe
