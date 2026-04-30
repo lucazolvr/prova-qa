@@ -1,11 +1,11 @@
 # Projeto de prova de automação QA
 
-Repositório único, em português brasileiro, para a prova de testes e qualidade de software. A proposta é reunir duas frentes no mesmo projeto:
+Repositório único, em português brasileiro, para a prova de testes e qualidade de software. A proposta reúne duas frentes no mesmo projeto:
 
 - automação de API do Swagger Petstore com Postman/Newman
 - automação web E2E do SauceDemo com Python e Selenium
 
-O projeto já saiu da fundação estrutural e agora possui a suíte inicial de API executável localmente com Newman. As próximas entregas continuam focadas em automação web, CI e acabamento para apresentação.
+Neste momento, o projeto já possui as duas automações principais executáveis localmente. Faltam a integração contínua e o acabamento final de documentação/evidências para apresentação.
 
 ## Objetivo da prova
 
@@ -21,18 +21,19 @@ Entregar um projeto apresentável que permita:
 
 No estado atual, o projeto já possui:
 
-- estrutura inicial de pastas para API, web e CI
+- estrutura única para API, web e CI
 - collection Postman da Petstore em `api/postman/petstore_collection.json`
 - execução local da suíte de API por `npm run api:test`
-- arquivo `package.json` com dependência de Newman e scripts da frente API
-- arquivo `requirements.txt` preparando a stack Python da automação web
-- arquivo `.env.example` para configuração segura da frente web
+- suíte web Selenium em Python com Page Objects dentro de `web/`
+- execução local do fluxo E2E web por `python -m pytest web/tests/test_checkout_e2e.py -q`
+- `package.json` com dependência de Newman e scripts da frente API
+- `requirements.txt` com a stack da frente web
+- `.env.example` com configuração de ambiente da automação web
 
 Ainda **não** existem nesta etapa:
 
-- testes Selenium implementados
 - workflow funcional de GitHub Actions
-- evidências finais da execução web e do CI
+- evidências finais e narrativa final de apresentação
 
 Esses itens entram nas próximas slices.
 
@@ -48,10 +49,19 @@ Esses itens entram nas próximas slices.
 │       └── petstore_environment.json
 ├── web/
 │   ├── config/
+│   │   └── settings.py
 │   ├── pages/
-│   └── tests/
+│   │   ├── cart_page.py
+│   │   ├── checkout_page.py
+│   │   ├── inventory_page.py
+│   │   └── login_page.py
+│   ├── tests/
+│   │   └── test_checkout_e2e.py
+│   ├── conftest.py
+│   └── driver_factory.py
 ├── package.json
 ├── requirements.txt
+├── pytest.ini
 ├── .env.example
 └── README.md
 ```
@@ -71,7 +81,7 @@ Cobertura atual da suíte API:
 - **Store**: consulta de inventário com validação de objeto retornado
 - **User**: login e logout com validação de sessão e encerramento
 
-Script disponível em `package.json`:
+Comando disponível:
 
 ```bash
 npm run api:test
@@ -83,9 +93,23 @@ npm run api:test
 - Selenium
 - `webdriver-manager`
 - `python-dotenv`
-- `pytest` como runner de testes
+- `pytest`
+- Page Objects para separar login, inventário, carrinho e checkout
+- waits explícitos nas transições principais do fluxo
 
-Dependências preparadas em `requirements.txt` para instalação futura.
+Cobertura atual da suíte web:
+
+- login com usuário de treino
+- adição do produto `Sauce Labs Backpack` ao carrinho
+- acesso ao carrinho
+- checkout com preenchimento de dados
+- finalização com confirmação de pedido
+
+Comando disponível:
+
+```bash
+python -m pytest web/tests/test_checkout_e2e.py -q
+```
 
 ## Configuração por ambiente
 
@@ -95,11 +119,22 @@ Arquivo disponível:
 
 - `.env.example`
 
-Quando a automação web for implementada, a configuração local esperada será baseada nesse modelo. O arquivo real `.env` não deve ser versionado.
+Variáveis previstas para a automação web:
+
+```env
+BASE_URL=https://www.saucedemo.com/
+LOGIN_USER=standard_user
+LOGIN_PASSWORD=secret_sauce
+BROWSER=chrome
+HEADLESS=true
+IMPLICIT_WAIT_SECONDS=0
+EXPLICIT_WAIT_SECONDS=10
+```
+
+Para uso local, copie `.env.example` para `.env` se quiser customizar valores. O arquivo real `.env` não deve ser versionado.
 
 ## Próximas entregas previstas
 
-- **S03**: automação web SauceDemo com Selenium
 - **S04**: integração contínua para API e web
 - **S05**: README final, evidências e acabamento para apresentação
 
@@ -126,15 +161,22 @@ A saída do Newman mostra o grupo, o request e a asserção que falhou, o que fa
 Instalar dependências Python:
 
 ```bash
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
-A execução dos testes web será adicionada quando a suíte Selenium existir.
+Executar a suíte web:
+
+```bash
+python -m pytest web/tests/test_checkout_e2e.py -q
+```
+
+Se quiser visualizar o navegador durante a execução, ajuste `HEADLESS=false` no `.env`.
 
 ## Observações para apresentação
 
 - O repositório foi estruturado para ficar simples de explicar em aula.
 - A separação entre API, web e CI é intencional para reduzir confusão.
-- Comentários no código serão mantidos apenas quando forem realmente necessários.
-- O histórico incremental de commits será tratado como parte do entregável.
+- Comentários no código foram mantidos no mínimo; a legibilidade vem da estrutura e dos nomes.
+- O histórico incremental de commits continua sendo tratado como parte do entregável.
 - A suíte API prioriza cenários representativos e estáveis para reduzir dependência de comportamento inconsistente da Petstore pública.
+- A suíte web usa Page Objects e waits explícitos para aderir ao guia da disciplina e reduzir flakiness.
