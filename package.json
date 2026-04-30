@@ -1,0 +1,13 @@
+{
+  "name": "prova-qa",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Projeto único da prova de automação QA com API em Postman/Newman e web em Selenium.",
+  "scripts": {
+    "api:test": "newman run api/postman/petstore_collection.json --reporters cli",
+    "api:test:ci": "newman run api/postman/petstore_collection.json --reporters cli"
+  },
+  "devDependencies": {
+    "newman": "^6.1.3"
+  }
+}
