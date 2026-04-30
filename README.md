@@ -1,23 +1,10 @@
-# Projeto de prova de automação QA
+# Projeto de Prova de Automação QA
 
-Repositório único, em português brasileiro, para a prova de testes e qualidade de software.
-
-O projeto entrega:
+Repositório único para a prova de testes e qualidade de software, reunindo:
 
 - automação de API do Swagger Petstore com Postman/Newman
 - automação web E2E do SauceDemo com Python e Selenium
 - pipeline GitHub Actions para as duas frentes
-- organização pensada para apresentação em aula
-
-## Visão geral
-
-Este trabalho foi estruturado para atender ao enunciado da prova com foco em três pontos:
-
-1. **execução real** das automações API e web
-2. **legibilidade** do repositório e do fluxo de testes
-3. **explicabilidade** na apresentação
-
-As duas frentes vivem no mesmo repositório, com comandos previsíveis, CI separado por job e documentação alinhada ao estado real do código.
 
 ## Tecnologias usadas
 
@@ -35,7 +22,7 @@ As duas frentes vivem no mesmo repositório, com comandos previsíveis, CI separ
 - python-dotenv
 - pytest
 
-### CI
+### CI/CD
 
 - GitHub Actions
 
@@ -69,43 +56,34 @@ As duas frentes vivem no mesmo repositório, com comandos previsíveis, CI separ
 └── README.md
 ```
 
-## O que foi automatizado
+## Instalação
 
-### API — Swagger Petstore
+### 1. Clonar o repositório
 
-Collection em:
+```bash
+git clone <url-do-repositorio>
+cd prova-qa
+```
 
-- `api/postman/petstore_collection.json`
+### 2. Instalar dependências da API
 
-Cobertura atual:
+```bash
+npm install
+```
 
-- **Pet**: listagem por status
-- **Store**: consulta de inventário
-- **User**: login e logout
+### 3. Instalar dependências da automação web
 
-A suíte foi mantida em cenários representativos e mais estáveis da API pública para reduzir falsos negativos em demonstração e CI.
+```bash
+python -m pip install -r requirements.txt
+```
 
-### Web — SauceDemo
+### 4. Configurar ambiente da automação web
 
-Teste em:
+Copie o arquivo `.env.example` para `.env` se quiser personalizar o ambiente:
 
-- `web/tests/test_checkout_e2e.py`
-
-Fluxo coberto:
-
-- login com `standard_user`
-- adição do produto `Sauce Labs Backpack` ao carrinho
-- acesso ao carrinho
-- checkout com preenchimento de dados
-- finalização do pedido
-
-A automação usa **Page Objects** e **waits explícitos**, seguindo o guia da disciplina.
-
-## Configuração do ambiente
-
-Arquivo base:
-
-- `.env.example`
+```bash
+cp .env.example .env
+```
 
 Variáveis disponíveis:
 
@@ -120,51 +98,46 @@ IMPLICIT_WAIT_SECONDS=0
 EXPLICIT_WAIT_SECONDS=10
 ```
 
-Se quiser customizar valores localmente:
+## Execução
 
-1. copie `.env.example` para `.env`
-2. ajuste o que precisar
-
-O arquivo `.env` **não deve ser versionado**.
-
-## Instalação
-
-### Dependências da API
-
-```bash
-npm install
-```
-
-### Dependências da automação web
-
-```bash
-python -m pip install -r requirements.txt
-```
-
-## Execução local
-
-### Rodar automação API
+### Executar automação API
 
 ```bash
 npm run api:test
 ```
 
-### Rodar automação web
+Cobertura atual:
+
+- Pet
+- Store
+- User
+
+### Executar automação web
 
 ```bash
 python -m pytest web/tests/test_checkout_e2e.py -q
 ```
 
-### Rodar as duas frentes antes da apresentação
+Fluxo atual:
+
+- login
+- adição de produto ao carrinho
+- carrinho
+- checkout
+- finalização da compra
+
+### Executar pipeline localmente por equivalência
+
+Os mesmos comandos usados no CI são:
 
 ```bash
 npm run api:test
 python -m pytest web/tests/test_checkout_e2e.py -q
 ```
 
-## Integração contínua
+## Pipeline
 
-Workflow:
+O workflow do GitHub Actions está em:
 
 - `.github/workflows/ci.yml`
 
@@ -173,120 +146,37 @@ Jobs configurados:
 - `api-tests`
 - `web-tests`
 
-Resumo:
+## Prints do funcionamento
 
-- o job de API executa `npm ci` e `npm run api:test`
-- o job de web instala Python, instala Chrome no runner e executa `python -m pytest web/tests/test_checkout_e2e.py -q`
+> Observação: o enunciado pede prints do funcionamento. A pasta de evidências pode ser mantida no repositório com capturas reais feitas antes da entrega final.
 
-A separação por job ajuda a identificar rapidamente se a falha veio da frente API ou da frente web.
+### Sugestão de prints para incluir
 
-## Evidências
+- execução verde da automação API no terminal
+- execução verde da automação web no terminal
+- execução da aba Actions no GitHub com os jobs `api-tests` e `web-tests`
+- execução visual do SauceDemo com login/carrinho/checkout (opcional)
 
-### Evidência da suíte API
+### Caminhos recomendados para evidências
 
-Comando validado localmente:
-
-```bash
-npm run api:test
+```text
+/docs/evidencias/api-newman.png
+/docs/evidencias/web-pytest.png
+/docs/evidencias/github-actions.png
+/docs/evidencias/saucedemo-checkout.png
 ```
 
-Resultado esperado:
+## Boas práticas aplicadas
 
-- requests dos grupos `Pet`, `Store` e `User`
-- asserções verdes no Newman
-- sumário final com zero falhas
-
-Na validação final local deste projeto, a suíte API passou com:
-
-- 4 requests executados
-- 10 asserções verdes
-- 0 falhas
-
-### Evidência da suíte web
-
-Comando validado localmente:
-
-```bash
-python -m pytest web/tests/test_checkout_e2e.py -q
-```
-
-Resultado esperado:
-
-- 1 teste passando
-- fluxo completo de login, carrinho e checkout executado sem erro
-
-Durante a estabilização final do projeto, esse teste foi executado repetidamente até ficar estável no ambiente local atual.
-
-### Evidência da pipeline
-
-Arquivo do workflow:
-
-- `.github/workflows/ci.yml`
-
-O workflow usa os mesmos comandos já validados localmente. Isso reduz a diferença entre execução manual e CI.
-
-## Troubleshooting
-
-### 1. API falhou no Newman
-
-Possíveis causas:
-
-- instabilidade momentânea da Petstore pública
-- timeout temporário do serviço
-- mudança de comportamento em endpoint público
-
-O que fazer:
-
-- rodar `npm run api:test` novamente
-- verificar no terminal qual grupo/request falhou
-- confirmar se a falha veio da API pública e não do projeto
-
-### 2. Web falhou no Selenium
-
-Possíveis causas:
-
-- instabilidade momentânea do SauceDemo
-- problema local com browser/driver
-- diferença de ambiente em modo headless
-
-O que fazer:
-
-- rodar `python -m pytest web/tests/test_checkout_e2e.py -q` novamente
-- se precisar observar visualmente, definir `HEADLESS=false` no `.env`
-- verificar se o browser está instalado corretamente
-
-### 3. CI falhou no GitHub Actions
-
-O que verificar:
-
-- qual job falhou: `api-tests` ou `web-tests`
-- se o erro ocorreu no Newman ou no pytest
-- se a falha foi de serviço externo ou de configuração do projeto
-
-## Pontos fortes para explicar em aula
-
-- repositório único para API, web e CI
-- uso de Postman/Newman conforme o guia de API
-- uso de Python + Selenium + Page Objects + waits explícitos conforme o guia web
-- pipeline separada por jobs para leitura rápida de falhas
-- histórico incremental de commits durante a evolução do trabalho
-
-## Apresentação
-
-Sugestão de roteiro curto:
-
-1. mostrar a estrutura do repositório
-2. abrir a collection da Petstore e explicar os grupos `Pet`, `Store` e `User`
-3. mostrar o teste web e os Page Objects
-4. executar localmente:
-   - `npm run api:test`
-   - `python -m pytest web/tests/test_checkout_e2e.py -q`
-5. abrir `.github/workflows/ci.yml` e explicar os dois jobs
-6. encerrar mostrando que README, código e pipeline estão alinhados
+- repositório único para as duas automações
+- Page Objects na automação web
+- waits explícitos no Selenium
+- asserções legíveis na API e na web
+- configuração por ambiente sem segredos no código
+- pipeline separada por job para facilitar leitura de falhas
 
 ## Observações finais
 
-- comentários foram mantidos no mínimo, priorizando nomes e estrutura claros
-- a suíte API prioriza cenários representativos e mais estáveis da API pública
-- a suíte web exigiu estabilização específica no checkout antes de sustentar o CI
-- a documentação foi mantida fiel ao estado real do projeto, sem prometer o que não existe
+- a automação API usa cenários representativos dos grupos principais da Petstore
+- a automação web cobre um fluxo E2E completo do SauceDemo
+- a pipeline executa as duas frentes como pedido no enunciado
