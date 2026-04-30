@@ -5,7 +5,7 @@ Repositório único, em português brasileiro, para a prova de testes e qualidad
 - automação de API do Swagger Petstore com Postman/Newman
 - automação web E2E do SauceDemo com Python e Selenium
 
-Este repositório ainda está na fase de fundação estrutural. Nesta slice, o foco foi criar uma base clara para as próximas entregas, sem antecipar implementação que ainda não existe.
+O projeto já saiu da fundação estrutural e agora possui a suíte inicial de API executável localmente com Newman. As próximas entregas continuam focadas em automação web, CI e acabamento para apresentação.
 
 ## Objetivo da prova
 
@@ -22,16 +22,17 @@ Entregar um projeto apresentável que permita:
 No estado atual, o projeto já possui:
 
 - estrutura inicial de pastas para API, web e CI
-- arquivo `package.json` preparando a execução da suíte de API com Newman
+- collection Postman da Petstore em `api/postman/petstore_collection.json`
+- execução local da suíte de API por `npm run api:test`
+- arquivo `package.json` com dependência de Newman e scripts da frente API
 - arquivo `requirements.txt` preparando a stack Python da automação web
-- arquivo `.env.example` para configuração segura de credenciais e variáveis de ambiente
+- arquivo `.env.example` para configuração segura da frente web
 
 Ainda **não** existem nesta etapa:
 
-- collection Postman da Petstore
 - testes Selenium implementados
 - workflow funcional de GitHub Actions
-- evidências finais da execução
+- evidências finais da execução web e do CI
 
 Esses itens entram nas próximas slices.
 
@@ -43,6 +44,8 @@ Esses itens entram nas próximas slices.
 │   └── workflows/
 ├── api/
 │   └── postman/
+│       ├── petstore_collection.json
+│       └── petstore_environment.json
 ├── web/
 │   ├── config/
 │   ├── pages/
@@ -59,15 +62,20 @@ Esses itens entram nas próximas slices.
 
 - Postman para modelagem e export da collection
 - Newman para execução local e futura execução no CI
-- caminho previsto da collection: `api/postman/petstore_collection.json`
+- collection localizada em `api/postman/petstore_collection.json`
+- ambiente local em `api/postman/petstore_environment.json`
 
-Script preparado em `package.json`:
+Cobertura atual da suíte API:
+
+- **Pet**: listagem por status com validação de status code e formato da resposta
+- **Store**: consulta de inventário com validação de objeto retornado
+- **User**: login e logout com validação de sessão e encerramento
+
+Script disponível em `package.json`:
 
 ```bash
 npm run api:test
 ```
-
-Observação: o script depende da collection existir no caminho previsto. Isso será entregue na slice de API.
 
 ### Web
 
@@ -91,12 +99,11 @@ Quando a automação web for implementada, a configuração local esperada será
 
 ## Próximas entregas previstas
 
-- **S02**: automação API Petstore com Postman/Newman
 - **S03**: automação web SauceDemo com Selenium
 - **S04**: integração contínua para API e web
 - **S05**: README final, evidências e acabamento para apresentação
 
-## Comandos previstos
+## Comandos disponíveis
 
 ### API
 
@@ -106,11 +113,13 @@ Instalar dependências Node:
 npm install
 ```
 
-Executar a suíte de API quando a collection existir:
+Executar a suíte de API:
 
 ```bash
 npm run api:test
 ```
+
+A saída do Newman mostra o grupo, o request e a asserção que falhou, o que facilita a explicação em aula e o diagnóstico local.
 
 ### Web
 
@@ -128,3 +137,4 @@ A execução dos testes web será adicionada quando a suíte Selenium existir.
 - A separação entre API, web e CI é intencional para reduzir confusão.
 - Comentários no código serão mantidos apenas quando forem realmente necessários.
 - O histórico incremental de commits será tratado como parte do entregável.
+- A suíte API prioriza cenários representativos e estáveis para reduzir dependência de comportamento inconsistente da Petstore pública.

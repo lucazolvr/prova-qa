@@ -1,0 +1,144 @@
+{
+  "info": {
+    "_postman_id": "0c65fe14-ec32-4f84-a873-3ba9b5d7162b",
+    "name": "Prova QA - Swagger Petstore",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Coleção base da prova para execução com Newman cobrindo User, Store e Pet."
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "https://petstore.swagger.io/v2" },
+    { "key": "petStatus", "value": "available" },
+    { "key": "knownUsername", "value": "test" },
+    { "key": "knownPassword", "value": "abc123" }
+  ],
+  "item": [
+    {
+      "name": "Pet",
+      "item": [
+        {
+          "name": "Listar pets por status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Pet - status code é 200', function () { pm.response.to.have.status(200); });",
+                  "const jsonData = pm.response.json();",
+                  "pm.test('Pet - resposta é uma lista', function () { pm.expect(jsonData).to.be.an('array'); });",
+                  "pm.test('Pet - lista tem pelo menos um item', function () { pm.expect(jsonData.length).to.be.greaterThan(0); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pet/findByStatus?status={{petStatus}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["pet", "findByStatus"],
+              "query": [
+                { "key": "status", "value": "{{petStatus}}" }
+              ]
+            },
+            "description": "Busca pets disponíveis para validar o grupo Pet com um cenário de leitura estável."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Store",
+      "item": [
+        {
+          "name": "Consultar inventário",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Store - status code é 200', function () { pm.response.to.have.status(200); });",
+                  "const jsonData = pm.response.json();",
+                  "pm.test('Store - resposta é um objeto', function () { pm.expect(jsonData).to.be.an('object'); });",
+                  "pm.test('Store - objeto possui ao menos uma chave', function () { pm.expect(Object.keys(jsonData).length).to.be.greaterThan(0); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/store/inventory",
+              "host": ["{{baseUrl}}"],
+              "path": ["store", "inventory"]
+            },
+            "description": "Valida o retorno de inventário como objeto legível do grupo Store."
+          }
+        }
+      ]
+    },
+    {
+      "name": "User",
+      "item": [
+        {
+          "name": "Login com usuário conhecido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('User login - status code é 200', function () { pm.response.to.have.status(200); });",
+                  "const jsonData = pm.response.json();",
+                  "pm.test('User login - retorno contém mensagem de sessão iniciada', function () { pm.expect(jsonData.message).to.include('logged in user session'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/login?username={{knownUsername}}&password={{knownPassword}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "login"],
+              "query": [
+                { "key": "username", "value": "{{knownUsername}}" },
+                { "key": "password", "value": "{{knownPassword}}" }
+              ]
+            },
+            "description": "Valida o grupo User por um fluxo de login mais estável que a persistência pública de create/get."
+          }
+        },
+        {
+          "name": "Logout do usuário conhecido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('User logout - status code é 200', function () { pm.response.to.have.status(200); });",
+                  "const jsonData = pm.response.json();",
+                  "pm.test('User logout - retorno confirma saída', function () { pm.expect(String(jsonData.message).toLowerCase()).to.include('ok'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "logout"]
+            },
+            "description": "Fecha um fluxo simples do grupo User com endpoint historicamente mais previsível na API pública."
+          }
+        }
+      ]
+    }
+  ]
+}
