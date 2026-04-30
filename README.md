@@ -5,7 +5,7 @@ Repositório único, em português brasileiro, para a prova de testes e qualidad
 - automação de API do Swagger Petstore com Postman/Newman
 - automação web E2E do SauceDemo com Python e Selenium
 
-Neste momento, o projeto já possui as duas automações principais executáveis localmente. Faltam a integração contínua e o acabamento final de documentação/evidências para apresentação.
+Neste momento, o projeto já possui as duas automações principais executáveis localmente e uma pipeline GitHub Actions preparada para rodar ambas. Falta o acabamento final de documentação, evidências e narrativa de apresentação.
 
 ## Objetivo da prova
 
@@ -26,16 +26,17 @@ No estado atual, o projeto já possui:
 - execução local da suíte de API por `npm run api:test`
 - suíte web Selenium em Python com Page Objects dentro de `web/`
 - execução local do fluxo E2E web por `python -m pytest web/tests/test_checkout_e2e.py -q`
+- workflow GitHub Actions em `.github/workflows/ci.yml`
 - `package.json` com dependência de Newman e scripts da frente API
 - `requirements.txt` com a stack da frente web
 - `.env.example` com configuração de ambiente da automação web
 
 Ainda **não** existem nesta etapa:
 
-- workflow funcional de GitHub Actions
-- evidências finais e narrativa final de apresentação
+- README final com evidências visuais da execução
+- narrativa final de apresentação e troubleshooting consolidado
 
-Esses itens entram nas próximas slices.
+Esses itens entram na próxima slice.
 
 ## Estrutura do repositório
 
@@ -43,6 +44,7 @@ Esses itens entram nas próximas slices.
 .
 ├── .github/
 │   └── workflows/
+│       └── ci.yml
 ├── api/
 │   └── postman/
 │       ├── petstore_collection.json
@@ -71,7 +73,7 @@ Esses itens entram nas próximas slices.
 ### API
 
 - Postman para modelagem e export da collection
-- Newman para execução local e futura execução no CI
+- Newman para execução local e execução no CI
 - collection localizada em `api/postman/petstore_collection.json`
 - ambiente local em `api/postman/petstore_environment.json`
 
@@ -126,6 +128,7 @@ BASE_URL=https://www.saucedemo.com/
 LOGIN_USER=standard_user
 LOGIN_PASSWORD=secret_sauce
 BROWSER=chrome
+CHROME_BINARY=
 HEADLESS=true
 IMPLICIT_WAIT_SECONDS=0
 EXPLICIT_WAIT_SECONDS=10
@@ -133,10 +136,23 @@ EXPLICIT_WAIT_SECONDS=10
 
 Para uso local, copie `.env.example` para `.env` se quiser customizar valores. O arquivo real `.env` não deve ser versionado.
 
-## Próximas entregas previstas
+## Integração contínua com GitHub Actions
 
-- **S04**: integração contínua para API e web
-- **S05**: README final, evidências e acabamento para apresentação
+A pipeline está definida em:
+
+- `.github/workflows/ci.yml`
+
+Jobs atuais:
+
+- **API - Newman Petstore**
+- **Web - Selenium SauceDemo**
+
+A proposta do workflow é simples:
+
+- o job de API faz checkout, instala Node e executa `npm ci` + `npm run api:test`
+- o job web faz checkout, instala Python, instala Google Chrome no runner e executa `python -m pip install -r requirements.txt` + `python -m pytest web/tests/test_checkout_e2e.py -q`
+
+Isso deixa claro na aba Actions qual frente falhou: API ou web.
 
 ## Comandos disponíveis
 
@@ -172,6 +188,10 @@ python -m pytest web/tests/test_checkout_e2e.py -q
 
 Se quiser visualizar o navegador durante a execução, ajuste `HEADLESS=false` no `.env`.
 
+## Próxima entrega prevista
+
+- **S05**: README final, evidências e acabamento para apresentação
+
 ## Observações para apresentação
 
 - O repositório foi estruturado para ficar simples de explicar em aula.
@@ -180,3 +200,4 @@ Se quiser visualizar o navegador durante a execução, ajuste `HEADLESS=false` n
 - O histórico incremental de commits continua sendo tratado como parte do entregável.
 - A suíte API prioriza cenários representativos e estáveis para reduzir dependência de comportamento inconsistente da Petstore pública.
 - A suíte web usa Page Objects e waits explícitos para aderir ao guia da disciplina e reduzir flakiness.
+- A pipeline usa os mesmos comandos já validados localmente, reduzindo diferença entre máquina de desenvolvimento e CI.

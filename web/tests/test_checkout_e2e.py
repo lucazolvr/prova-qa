@@ -26,7 +26,7 @@ def test_checkout_e2e(driver, settings):
     checkout_page.fill_customer_information(
         first_name="QA",
         last_name="Automation",
-        postal_code="89000-000",
+        postal_code="89000000",
     )
     checkout_page.finish_checkout()
 

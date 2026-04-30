@@ -1,0 +1,56 @@
+name: CI - API e Web
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  api-tests:
+    name: API - Newman Petstore
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Instalar dependências Node
+        run: npm ci
+
+      - name: Rodar automação API
+        run: npm run api:test
+
+  web-tests:
+    name: Web - Selenium SauceDemo
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: "pip"
+
+      - name: Instalar Google Chrome
+        id: setup-chrome
+        uses: browser-actions/setup-chrome@v1
+
+      - name: Instalar dependências Python
+        run: python -m pip install -r requirements.txt
+
+      - name: Rodar automação web
+        env:
+          HEADLESS: "true"
+          BROWSER: "chrome"
+          CHROME_BINARY: ${{ steps.setup-chrome.outputs.chrome-path }}
+        run: python -m pytest web/tests/test_checkout_e2e.py -q
