@@ -48,4 +48,15 @@ jobs:
         env:
           HEADLESS: "true"
           BROWSER: "chrome"
+          EXPLICIT_WAIT_SECONDS: "30"
         run: python -m pytest web/tests/test_checkout_e2e.py -q
+
+      - name: Publicar artefatos de debug Selenium
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: selenium-debug
+          path: |
+            tmp/selenium-debug/**
+            docs/evidencias/**
+          if-no-files-found: ignore
