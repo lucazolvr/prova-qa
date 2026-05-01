@@ -344,3 +344,4 @@ Quando o fluxo passa corretamente, o teste comprova que:
 - `web/driver_factory.py`
 - `.github/workflows/ci.yml`
 - `README.md`
+- `ROTEIRO.md`

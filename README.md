@@ -1,32 +1,45 @@
-# Projeto de Prova de Automação QA
+# Prova QA — Automação de API e Web com CI
 
-Repositório único para a prova de testes e qualidade de software, reunindo:
+Este repositório apresenta uma solução única para a prova prática de Qualidade de Software, reunindo duas frentes de automação:
 
-- automação de API do Swagger Petstore com Postman/Newman
-- automação web E2E do SauceDemo com Python e Selenium
-- pipeline GitHub Actions para as duas frentes
+- **Automação de API** da Swagger Petstore com **Postman/Newman**
+- **Automação web E2E** do SauceDemo com **Python, Selenium e pytest**
 
-## Tecnologias usadas
+Além das suítes automatizadas, o projeto inclui **pipeline de integração contínua no GitHub Actions**, documentação detalhada dos testes e evidências visuais da execução.
 
-### API
+---
 
+## Objetivo do projeto
+
+O projeto foi construído para atender aos requisitos da prova, cobrindo:
+
+1. **API** — cobertura completa dos endpoints expostos dos grupos `Pet`, `Store` e `User` da Swagger Petstore v2
+2. **Web** — fluxo ponta a ponta no SauceDemo com login, adição ao carrinho e finalização da compra
+3. **CI/CD** — execução automatizada das duas frentes em pipeline
+4. **Boas práticas** — organização clara, separação de responsabilidades, Page Objects, asserções legíveis e configuração por ambiente
+
+---
+
+## Tecnologias utilizadas
+
+### Automação de API
 - Postman
 - Newman
 - Node.js
 
-### Web
-
+### Automação Web
 - Python 3
 - Selenium
+- pytest
 - webdriver-manager
 - python-dotenv
-- pytest
 
-### CI/CD
-
+### Integração Contínua
 - GitHub Actions
 
-## Estrutura do projeto
+---
+
+## Estrutura do repositório
 
 ```text
 .
@@ -37,6 +50,10 @@ Repositório único para a prova de testes e qualidade de software, reunindo:
 │   └── postman/
 │       ├── petstore_collection.json
 │       └── petstore_environment.json
+├── docs/
+│   ├── evidencias/
+│   ├── testes-api.md
+│   └── testes-web.md
 ├── web/
 │   ├── config/
 │   │   └── settings.py
@@ -49,14 +66,64 @@ Repositório único para a prova de testes e qualidade de software, reunindo:
 │   │   └── test_checkout_e2e.py
 │   ├── conftest.py
 │   └── driver_factory.py
-├── package.json
-├── requirements.txt
-├── pytest.ini
 ├── .env.example
-└── README.md
+├── package.json
+├── pytest.ini
+├── requirements.txt
+├── README.md
+└── ROTEIRO.md
 ```
 
-## Instalação
+---
+
+## Cobertura implementada
+
+### API — Swagger Petstore
+
+A suíte de API cobre todos os endpoints expostos dos grupos principais da Petstore:
+
+#### Pet
+- `GET /pet/findByStatus`
+- `GET /pet/findByTags`
+- `POST /pet`
+- `GET /pet/{petId}`
+- `POST /pet/{petId}`
+- `POST /pet/{petId}/uploadImage`
+- `PUT /pet`
+- `DELETE /pet/{petId}`
+
+#### Store
+- `GET /store/inventory`
+- `POST /store/order`
+- `GET /store/order/{orderId}`
+- `DELETE /store/order/{orderId}`
+
+#### User
+- `POST /user`
+- `POST /user/createWithArray`
+- `POST /user/createWithList`
+- `GET /user/{username}`
+- `PUT /user/{username}`
+- `GET /user/login`
+- `GET /user/logout`
+- `DELETE /user/{username}`
+
+### Web — SauceDemo
+
+A suíte web cobre o fluxo E2E principal:
+
+- login com usuário válido
+- acesso à tela de inventário
+- adição de produto ao carrinho
+- validação do item no carrinho
+- início do checkout
+- preenchimento das informações do comprador
+- revisão do pedido
+- finalização bem-sucedida da compra
+
+---
+
+## Como executar o projeto
 
 ### 1. Clonar o repositório
 
@@ -77,15 +144,15 @@ npm install
 python -m pip install -r requirements.txt
 ```
 
-### 4. Configurar ambiente da automação web
+### 4. Configurar variáveis de ambiente da automação web
 
-Copie o arquivo `.env.example` para `.env` se quiser personalizar o ambiente:
+Criar um `.env` a partir de `.env.example`:
 
 ```bash
 cp .env.example .env
 ```
 
-Variáveis disponíveis:
+Exemplo de configuração:
 
 ```env
 BASE_URL=https://www.saucedemo.com/
@@ -98,53 +165,34 @@ IMPLICIT_WAIT_SECONDS=0
 EXPLICIT_WAIT_SECONDS=10
 ```
 
-## Execução
+---
 
-### Executar automação API
+## Execução local
+
+### Rodar automação API
 
 ```bash
 npm run api:test
 ```
 
-Cobertura atual:
-
-- Pet
-- Store
-- User
-
-### Executar automação web
+### Rodar automação web
 
 ```bash
 python -m pytest web/tests/test_checkout_e2e.py -q
 ```
 
-Fluxo atual:
-
-- login
-- adição de produto ao carrinho
-- carrinho
-- checkout
-- finalização da compra
-
-### Executar pipeline localmente por equivalência
-
-Os mesmos comandos usados no CI são:
+### Rodar as duas frentes
 
 ```bash
 npm run api:test
 python -m pytest web/tests/test_checkout_e2e.py -q
 ```
 
-## Documentação detalhada dos testes
+---
 
-Documentações dedicadas por frente:
+## Integração contínua
 
-- `docs/testes-api.md`
-- `docs/testes-web.md`
-
-## Pipeline
-
-O workflow do GitHub Actions está em:
+A pipeline está definida em:
 
 - `.github/workflows/ci.yml`
 
@@ -153,37 +201,68 @@ Jobs configurados:
 - `api-tests`
 - `web-tests`
 
-## Prints do funcionamento
+A pipeline executa exatamente os mesmos comandos validados localmente.
 
-> Observação: o enunciado pede prints do funcionamento. A pasta de evidências pode ser mantida no repositório com capturas reais feitas antes da entrega final.
+---
 
-### Sugestão de prints para incluir
+## Documentação detalhada
 
-- execução verde da automação API no terminal
-- execução verde da automação web no terminal
-- execução da aba Actions no GitHub com os jobs `api-tests` e `web-tests`
-- execução visual do SauceDemo com login/carrinho/checkout (opcional)
+O projeto possui documentação dedicada para cada frente de teste:
 
-### Caminhos recomendados para evidências
+- `docs/testes-api.md` — documentação detalhada da suíte de API
+- `docs/testes-web.md` — documentação detalhada da suíte web
+- `ROTEIRO.md` — roteiro de apoio para apresentação e navegação do projeto
 
-```text
-/docs/evidencias/api-newman.png
-/docs/evidencias/web-pytest.png
-/docs/evidencias/github-actions.png
-/docs/evidencias/saucedemo-checkout.png
-```
+---
+
+## Evidências
+
+A pasta `docs/evidencias/` concentra imagens úteis para apresentação e comprovação do fluxo automatizado.
+
+### Evidências web já presentes
+- `docs/evidencias/01-login.png`
+- `docs/evidencias/03-produto-no-carrinho.png`
+- `docs/evidencias/06-checkout-resumo.png`
+- `docs/evidencias/07-compra-finalizada.png`
+
+### Evidências recomendadas para complementar
+- `docs/evidencias/api-newman.png` — execução verde da suíte API no terminal
+- `docs/evidencias/github-actions.png` — execução verde da pipeline no GitHub Actions
+
+---
 
 ## Boas práticas aplicadas
 
-- repositório único para as duas automações
-- Page Objects na automação web
-- waits explícitos no Selenium
-- asserções legíveis na API e na web
-- configuração por ambiente sem segredos no código
-- pipeline separada por job para facilitar leitura de falhas
+- repositório único para API e web
+- separação clara entre automação, configuração, documentação e pipeline
+- uso de **Page Objects** na automação web
+- waits explícitos para reduzir flaky tests
+- asserções legíveis e orientadas a diagnóstico
+- configuração por ambiente, sem hardcode de segredos
+- histórico incremental de evolução no repositório
+
+---
+
+## Resultado atual
+
+Verificação final validada localmente:
+
+```bash
+npm run api:test && python -m pytest web/tests/test_checkout_e2e.py -q
+```
+
+Resultado:
+
+- **API**: 21 requests, 48 assertions, 0 failed
+- **Web**: 1 teste E2E passando
+
+---
 
 ## Observações finais
 
+Este projeto foi estruturado para ser:
+
+- executável localmente com comandos simples
+- suficientemente organizado para manutenção, demonstração e evolução
 - a automação API cobre todos os endpoints expostos dos grupos principais da Petstore (Pet, Store e User)
 - a automação web cobre um fluxo E2E completo do SauceDemo
-- a pipeline executa as duas frentes como pedido no enunciado

@@ -417,3 +417,4 @@ Na execução validada após a ampliação da collection:
 - `package.json`
 - `.github/workflows/ci.yml`
 - `README.md`
+- `ROTEIRO.md`
