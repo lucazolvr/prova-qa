@@ -4,11 +4,7 @@ import os
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options as ChromeOptions
-from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.edge.options import Options as EdgeOptions
-from selenium.webdriver.edge.service import Service as EdgeService
-from webdriver_manager.chrome import ChromeDriverManager
-from webdriver_manager.microsoft import EdgeChromiumDriverManager
 
 from web.config.settings import Settings
 
@@ -24,8 +20,7 @@ def _build_chrome(settings: Settings) -> webdriver.Chrome:
     options.add_argument("--disable-search-engine-choice-screen")
     if settings.chrome_binary:
         options.binary_location = settings.chrome_binary
-    service = ChromeService(ChromeDriverManager().install())
-    driver = webdriver.Chrome(service=service, options=options)
+    driver = webdriver.Chrome(options=options)
     driver.implicitly_wait(settings.implicit_wait_seconds)
     return driver
 
@@ -38,8 +33,7 @@ def _build_edge(settings: Settings) -> webdriver.Edge:
     options.add_argument("--disable-gpu")
     if settings.chrome_binary:
         options.binary_location = settings.chrome_binary
-    service = EdgeService(EdgeChromiumDriverManager().install())
-    driver = webdriver.Edge(service=service, options=options)
+    driver = webdriver.Edge(options=options)
     driver.implicitly_wait(settings.implicit_wait_seconds)
     return driver
 
