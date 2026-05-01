@@ -105,7 +105,14 @@ class CheckoutPage:
 
         continue_button = self.wait.until(EC.element_to_be_clickable(self.CONTINUE_BUTTON))
         self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", continue_button)
-        continue_button.click()
+        self.driver.execute_script("arguments[0].click();", continue_button)
+
+        try:
+            self.wait.until(lambda driver: "checkout-step-two.html" in driver.current_url or bool(driver.find_elements(*self.ERROR_BANNER)))
+        except TimeoutException as exc:
+            raise AssertionError(
+                f"Checkout não reagiu ao submit das informações. {self._debug_context(self.driver)} {self._capture_debug_artifacts('checkout-submit-timeout')}"
+            ) from exc
 
         if "checkout-step-two.html" not in self.driver.current_url:
             error_banners = self.driver.find_elements(*self.ERROR_BANNER)
@@ -113,6 +120,10 @@ class CheckoutPage:
                 raise AssertionError(
                     f"Checkout exibiu erro de validação: {error_banners[0].text}. {self._debug_context(self.driver)} {self._capture_debug_artifacts('checkout-validation-error')}"
                 )
+
+            raise AssertionError(
+                f"Checkout permaneceu na etapa de informações sem erro visível. {self._debug_context(self.driver)} {self._capture_debug_artifacts('checkout-stuck-on-information')}"
+            )
 
     def wait_for_overview_step(self) -> None:
         try:
@@ -129,7 +140,14 @@ class CheckoutPage:
         self.wait_for_overview_step()
         finish_button = self.wait.until(EC.element_to_be_clickable(self.FINISH_BUTTON))
         self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", finish_button)
-        finish_button.click()
+        self.driver.execute_script("arguments[0].click();", finish_button)
+
+        try:
+            self.wait.until(EC.url_contains("checkout-complete.html"))
+        except TimeoutException as exc:
+            raise AssertionError(
+                f"Checkout não reagiu ao clique de finalizar. {self._debug_context(self.driver)} {self._capture_debug_artifacts('checkout-finish-timeout')}"
+            ) from exc
 
     def get_success_message(self) -> str:
         try:
