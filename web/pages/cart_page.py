@@ -21,7 +21,8 @@ class CartPage:
 
     def start_checkout(self) -> None:
         self.wait_until_loaded()
-        self.driver.find_element(*self.CHECKOUT_BUTTON).click()
+        self.wait.until(EC.element_to_be_clickable(self.CHECKOUT_BUTTON)).click()
+        self.wait.until(EC.url_contains("checkout-step-one.html"))
 
     def has_backpack(self) -> bool:
         self.wait_until_loaded()

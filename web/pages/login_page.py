@@ -27,7 +27,8 @@ class LoginPage:
         self.driver.find_element(*self.USERNAME_INPUT).send_keys(username)
         self.driver.find_element(*self.PASSWORD_INPUT).clear()
         self.driver.find_element(*self.PASSWORD_INPUT).send_keys(password)
-        self.driver.find_element(*self.LOGIN_BUTTON).click()
+        self.wait.until(EC.element_to_be_clickable(self.LOGIN_BUTTON)).click()
+        self.wait.until(EC.url_contains("inventory.html"))
 
     def get_error_message(self) -> str:
         return self.wait.until(EC.visibility_of_element_located(self.ERROR_BANNER)).text
