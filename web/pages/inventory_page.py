@@ -26,7 +26,8 @@ class InventoryPage:
         self.wait.until(EC.text_to_be_present_in_element(self.CART_BADGE, "1"))
 
     def open_cart(self) -> None:
-        self.wait.until(EC.element_to_be_clickable(self.CART_LINK)).click()
+        cart_link = self.wait.until(EC.element_to_be_clickable(self.CART_LINK))
+        self.driver.execute_script("arguments[0].click();", cart_link)
         self.wait.until(EC.url_contains("cart.html"))
 
     def get_title(self) -> str:
