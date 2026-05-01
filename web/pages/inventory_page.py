@@ -22,7 +22,8 @@ class InventoryPage:
 
     def add_backpack_to_cart(self) -> None:
         self.wait_until_loaded()
-        self.driver.find_element(*self.BACKPACK_ADD_BUTTON).click()
+        btn = self.wait.until(EC.element_to_be_clickable(self.BACKPACK_ADD_BUTTON))
+        self.driver.execute_script("arguments[0].click();", btn)
         self.wait.until(EC.text_to_be_present_in_element(self.CART_BADGE, "1"))
 
     def open_cart(self) -> None:
