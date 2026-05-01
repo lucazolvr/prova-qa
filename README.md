@@ -135,6 +135,13 @@ npm run api:test
 python -m pytest web/tests/test_checkout_e2e.py -q
 ```
 
+## Documentação detalhada dos testes
+
+Documentações dedicadas por frente:
+
+- `docs/testes-api.md`
+- `docs/testes-web.md`
+
 ## Pipeline
 
 O workflow do GitHub Actions está em:
@@ -177,6 +184,6 @@ Jobs configurados:
 
 ## Observações finais
 
-- a automação API usa cenários representativos dos grupos principais da Petstore
+- a automação API cobre todos os endpoints expostos dos grupos principais da Petstore (Pet, Store e User)
 - a automação web cobre um fluxo E2E completo do SauceDemo
 - a pipeline executa as duas frentes como pedido no enunciado
