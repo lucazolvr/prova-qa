@@ -3,13 +3,44 @@
     "_postman_id": "0c65fe14-ec32-4f84-a873-3ba9b5d7162b",
     "name": "Prova QA - Swagger Petstore",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Coleção base da prova para execução com Newman cobrindo User, Store e Pet."
+    "description": "Coleção da prova para execução com Newman cobrindo todos os endpoints dos grupos User, Store e Pet."
   },
   "variable": [
     { "key": "baseUrl", "value": "https://petstore.swagger.io/v2" },
     { "key": "petStatus", "value": "available" },
-    { "key": "knownUsername", "value": "test" },
-    { "key": "knownPassword", "value": "abc123" }
+    { "key": "petTag", "value": "tag1" },
+    { "key": "petId", "value": "9876543210123" },
+    { "key": "orderId", "value": "987654321" },
+    { "key": "username", "value": "qa_user_pi_987654" },
+    { "key": "password", "value": "abc123" }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "if (!pm.collectionVariables.get('runInitialized')) {",
+          "  const runId = Date.now();",
+          "  const petId = String(runId);",
+          "  const orderId = String(runId).slice(-9);",
+          "  const username = `qa_user_${runId}`;",
+          "  pm.collectionVariables.set('petId', petId);",
+          "  pm.collectionVariables.set('orderId', orderId);",
+          "  pm.collectionVariables.set('username', username);",
+          "  pm.collectionVariables.set('password', 'abc123');",
+          "  pm.collectionVariables.set('petName', `pi-pet-${runId}`);",
+          "  pm.collectionVariables.set('petUpdatedName', `pi-pet-updated-${runId}`);",
+          "  pm.collectionVariables.set('petFinalName', `pi-pet-final-${runId}`);",
+          "  pm.collectionVariables.set('userFirstName', 'QA');",
+          "  pm.collectionVariables.set('userUpdatedFirstName', 'QA2');",
+          "  pm.collectionVariables.set('userEmail', `qa_${runId}@example.com`);",
+          "  pm.collectionVariables.set('userUpdatedEmail', `qa2_${runId}@example.com`);",
+          "  pm.collectionVariables.set('runInitialized', 'true');",
+          "}"
+        ]
+      }
+    }
   ],
   "item": [
     {
@@ -23,10 +54,10 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Pet - status code é 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Pet list by status - status code é 200', function () { pm.response.to.have.status(200); });",
                   "const jsonData = pm.response.json();",
-                  "pm.test('Pet - resposta é uma lista', function () { pm.expect(jsonData).to.be.an('array'); });",
-                  "pm.test('Pet - lista tem pelo menos um item', function () { pm.expect(jsonData.length).to.be.greaterThan(0); });"
+                  "pm.test('Pet list by status - resposta é uma lista', function () { pm.expect(jsonData).to.be.an('array'); });",
+                  "pm.test('Pet list by status - lista tem ao menos um item', function () { pm.expect(jsonData.length).to.be.greaterThan(0); });"
                 ]
               }
             }
@@ -42,7 +73,248 @@
                 { "key": "status", "value": "{{petStatus}}" }
               ]
             },
-            "description": "Busca pets disponíveis para validar o grupo Pet com um cenário de leitura estável."
+            "description": "Valida o endpoint GET /pet/findByStatus."
+          }
+        },
+        {
+          "name": "Listar pets por tags",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Pet list by tags - status code é 200', function () { pm.response.to.have.status(200); });",
+                  "const jsonData = pm.response.json();",
+                  "pm.test('Pet list by tags - resposta é uma lista', function () { pm.expect(jsonData).to.be.an('array'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pet/findByTags?tags={{petTag}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["pet", "findByTags"],
+              "query": [
+                { "key": "tags", "value": "{{petTag}}" }
+              ]
+            },
+            "description": "Valida o endpoint GET /pet/findByTags."
+          }
+        },
+        {
+          "name": "Criar pet",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Pet create - status code é 200', function () { pm.response.to.have.status(200); });",
+                  "const jsonData = pm.response.json();",
+                  "pm.test('Pet create - id criado confere', function () { pm.expect(String(jsonData.id)).to.eql(pm.collectionVariables.get('petId')); });",
+                  "pm.test('Pet create - nome criado confere', function () { pm.expect(jsonData.name).to.eql(pm.collectionVariables.get('petName')); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{petId}},\n  \"category\": {\n    \"id\": 1,\n    \"name\": \"dogs\"\n  },\n  \"name\": \"{{petName}}\",\n  \"photoUrls\": [\n    \"https://example.com/pet.jpg\"\n  ],\n  \"tags\": [\n    {\n      \"id\": 1,\n      \"name\": \"{{petTag}}\"\n    }\n  ],\n  \"status\": \"available\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pet",
+              "host": ["{{baseUrl}}"],
+              "path": ["pet"]
+            },
+            "description": "Valida o endpoint POST /pet."
+          }
+        },
+        {
+          "name": "Buscar pet por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Pet get by id - status code é 200', function () { pm.response.to.have.status(200); });",
+                  "const jsonData = pm.response.json();",
+                  "pm.test('Pet get by id - id retornado confere', function () { pm.expect(String(jsonData.id)).to.eql(pm.collectionVariables.get('petId')); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pet/{{petId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["pet", "{{petId}}"]
+            },
+            "description": "Valida o endpoint GET /pet/{petId}."
+          }
+        },
+        {
+          "name": "Atualizar pet por formulário",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Pet update form - status code é 200', function () { pm.response.to.have.status(200); });",
+                  "const jsonData = pm.response.json();",
+                  "pm.test('Pet update form - resposta confirma operação', function () { pm.expect(String(jsonData.message)).to.eql(pm.collectionVariables.get('petId')); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/x-www-form-urlencoded" }
+            ],
+            "body": {
+              "mode": "urlencoded",
+              "urlencoded": [
+                { "key": "name", "value": "{{petUpdatedName}}", "type": "text" },
+                { "key": "status", "value": "sold", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pet/{{petId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["pet", "{{petId}}"]
+            },
+            "description": "Valida o endpoint POST /pet/{petId}."
+          }
+        },
+        {
+          "name": "Upload de imagem do pet",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Pet upload image - status code é 200', function () { pm.response.to.have.status(200); });",
+                  "const jsonData = pm.response.json();",
+                  "pm.test('Pet upload image - mensagem contém uploaded', function () { pm.expect(String(jsonData.message).toLowerCase()).to.include('uploaded'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "additionalMetadata", "value": "pi-upload", "type": "text" },
+                { "key": "file", "value": "hello from pi", "type": "text" }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pet/{{petId}}/uploadImage",
+              "host": ["{{baseUrl}}"],
+              "path": ["pet", "{{petId}}", "uploadImage"]
+            },
+            "description": "Valida o endpoint POST /pet/{petId}/uploadImage."
+          }
+        },
+        {
+          "name": "Atualizar pet completo",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Pet update full - status code é 200', function () { pm.response.to.have.status(200); });",
+                  "const jsonData = pm.response.json();",
+                  "pm.test('Pet update full - status final confere', function () { pm.expect(jsonData.status).to.eql('pending'); });",
+                  "pm.test('Pet update full - nome final confere', function () { pm.expect(jsonData.name).to.eql(pm.collectionVariables.get('petFinalName')); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{petId}},\n  \"category\": {\n    \"id\": 1,\n    \"name\": \"dogs\"\n  },\n  \"name\": \"{{petFinalName}}\",\n  \"photoUrls\": [\n    \"https://example.com/pet.jpg\"\n  ],\n  \"tags\": [\n    {\n      \"id\": 1,\n      \"name\": \"{{petTag}}\"\n    }\n  ],\n  \"status\": \"pending\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pet",
+              "host": ["{{baseUrl}}"],
+              "path": ["pet"]
+            },
+            "description": "Valida o endpoint PUT /pet."
+          }
+        },
+        {
+          "name": "Excluir pet",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Pet delete - status code é 200', function () { pm.response.to.have.status(200); });",
+                  "const jsonData = pm.response.json();",
+                  "pm.test('Pet delete - resposta confirma exclusão', function () { pm.expect(String(jsonData.message)).to.eql(pm.collectionVariables.get('petId')); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pet/{{petId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["pet", "{{petId}}"]
+            },
+            "description": "Valida o endpoint DELETE /pet/{petId}."
+          }
+        },
+        {
+          "name": "Confirmar pet excluído",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Pet deleted check - status code é 404', function () { pm.response.to.have.status(404); });",
+                  "const jsonData = pm.response.json();",
+                  "pm.test('Pet deleted check - mensagem informa ausência', function () { pm.expect(String(jsonData.message).toLowerCase()).to.include('not found'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pet/{{petId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["pet", "{{petId}}"]
+            },
+            "description": "Confirma a exclusão via GET /pet/{petId}."
           }
         }
       ]
@@ -58,10 +330,10 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Store - status code é 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Store inventory - status code é 200', function () { pm.response.to.have.status(200); });",
                   "const jsonData = pm.response.json();",
-                  "pm.test('Store - resposta é um objeto', function () { pm.expect(jsonData).to.be.an('object'); });",
-                  "pm.test('Store - objeto possui ao menos uma chave', function () { pm.expect(Object.keys(jsonData).length).to.be.greaterThan(0); });"
+                  "pm.test('Store inventory - resposta é um objeto', function () { pm.expect(jsonData).to.be.an('object'); });",
+                  "pm.test('Store inventory - objeto possui ao menos uma chave', function () { pm.expect(Object.keys(jsonData).length).to.be.greaterThan(0); });"
                 ]
               }
             }
@@ -74,25 +346,53 @@
               "host": ["{{baseUrl}}"],
               "path": ["store", "inventory"]
             },
-            "description": "Valida o retorno de inventário como objeto legível do grupo Store."
+            "description": "Valida o endpoint GET /store/inventory."
           }
-        }
-      ]
-    },
-    {
-      "name": "User",
-      "item": [
+        },
         {
-          "name": "Login com usuário conhecido",
+          "name": "Criar pedido",
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('User login - status code é 200', function () { pm.response.to.have.status(200); });",
+                  "pm.test('Store order create - status code é 200', function () { pm.response.to.have.status(200); });",
                   "const jsonData = pm.response.json();",
-                  "pm.test('User login - retorno contém mensagem de sessão iniciada', function () { pm.expect(jsonData.message).to.include('logged in user session'); });"
+                  "pm.test('Store order create - id do pedido confere', function () { pm.expect(String(jsonData.id)).to.eql(pm.collectionVariables.get('orderId')); });",
+                  "pm.test('Store order create - petId do pedido confere', function () { pm.expect(String(jsonData.petId)).to.eql(pm.collectionVariables.get('petId')); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{orderId}},\n  \"petId\": {{petId}},\n  \"quantity\": 1,\n  \"shipDate\": \"2026-05-01T00:00:00.000Z\",\n  \"status\": \"placed\",\n  \"complete\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/store/order",
+              "host": ["{{baseUrl}}"],
+              "path": ["store", "order"]
+            },
+            "description": "Valida o endpoint POST /store/order."
+          }
+        },
+        {
+          "name": "Buscar pedido por ID",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Store order get - status code é 200', function () { pm.response.to.have.status(200); });",
+                  "const jsonData = pm.response.json();",
+                  "pm.test('Store order get - id retornado confere', function () { pm.expect(String(jsonData.id)).to.eql(pm.collectionVariables.get('orderId')); });"
                 ]
               }
             }
@@ -101,19 +401,231 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/user/login?username={{knownUsername}}&password={{knownPassword}}",
+              "raw": "{{baseUrl}}/store/order/{{orderId}}",
               "host": ["{{baseUrl}}"],
-              "path": ["user", "login"],
-              "query": [
-                { "key": "username", "value": "{{knownUsername}}" },
-                { "key": "password", "value": "{{knownPassword}}" }
-              ]
+              "path": ["store", "order", "{{orderId}}"]
             },
-            "description": "Valida o grupo User por um fluxo de login mais estável que a persistência pública de create/get."
+            "description": "Valida o endpoint GET /store/order/{orderId}."
           }
         },
         {
-          "name": "Logout do usuário conhecido",
+          "name": "Excluir pedido",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Store order delete - status code é 200', function () { pm.response.to.have.status(200); });",
+                  "const jsonData = pm.response.json();",
+                  "pm.test('Store order delete - resposta confirma exclusão', function () { pm.expect(String(jsonData.message)).to.eql(pm.collectionVariables.get('orderId')); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/store/order/{{orderId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["store", "order", "{{orderId}}"]
+            },
+            "description": "Valida o endpoint DELETE /store/order/{orderId}."
+          }
+        }
+      ]
+    },
+    {
+      "name": "User",
+      "item": [
+        {
+          "name": "Criar usuário",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('User create - status code é 200', function () { pm.response.to.have.status(200); });",
+                  "const jsonData = pm.response.json();",
+                  "pm.test('User create - resposta confirma operação', function () { pm.expect(String(jsonData.message).length).to.be.greaterThan(0); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1001,\n  \"username\": \"{{username}}\",\n  \"firstName\": \"{{userFirstName}}\",\n  \"lastName\": \"Pi\",\n  \"email\": \"{{userEmail}}\",\n  \"password\": \"{{password}}\",\n  \"phone\": \"11999999999\",\n  \"userStatus\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user",
+              "host": ["{{baseUrl}}"],
+              "path": ["user"]
+            },
+            "description": "Valida o endpoint POST /user."
+          }
+        },
+        {
+          "name": "Criar usuários com array",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('User create with array - status code é 200', function () { pm.response.to.have.status(200); });",
+                  "const jsonData = pm.response.json();",
+                  "pm.test('User create with array - resposta confirma operação', function () { pm.expect(String(jsonData.message).toLowerCase()).to.include('ok'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"id\": 1002,\n    \"username\": \"{{username}}_array\",\n    \"firstName\": \"Array\",\n    \"lastName\": \"User\",\n    \"email\": \"array_{{userEmail}}\",\n    \"password\": \"{{password}}\",\n    \"phone\": \"111111111\",\n    \"userStatus\": 1\n  }\n]"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/createWithArray",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "createWithArray"]
+            },
+            "description": "Valida o endpoint POST /user/createWithArray."
+          }
+        },
+        {
+          "name": "Criar usuários com lista",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('User create with list - status code é 200', function () { pm.response.to.have.status(200); });",
+                  "const jsonData = pm.response.json();",
+                  "pm.test('User create with list - resposta confirma operação', function () { pm.expect(String(jsonData.message).toLowerCase()).to.include('ok'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"id\": 1003,\n    \"username\": \"{{username}}_list\",\n    \"firstName\": \"List\",\n    \"lastName\": \"User\",\n    \"email\": \"list_{{userEmail}}\",\n    \"password\": \"{{password}}\",\n    \"phone\": \"222222222\",\n    \"userStatus\": 1\n  }\n]"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/createWithList",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "createWithList"]
+            },
+            "description": "Valida o endpoint POST /user/createWithList."
+          }
+        },
+        {
+          "name": "Buscar usuário por username",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('User get by username - status code é 200', function () { pm.response.to.have.status(200); });",
+                  "const jsonData = pm.response.json();",
+                  "pm.test('User get by username - username confere', function () { pm.expect(jsonData.username).to.eql(pm.collectionVariables.get('username')); });",
+                  "pm.test('User get by username - email confere', function () { pm.expect(jsonData.email).to.eql(pm.collectionVariables.get('userEmail')); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/{{username}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "{{username}}"]
+            },
+            "description": "Valida o endpoint GET /user/{username}."
+          }
+        },
+        {
+          "name": "Atualizar usuário",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('User update - status code é 200', function () { pm.response.to.have.status(200); });",
+                  "const jsonData = pm.response.json();",
+                  "pm.test('User update - resposta confirma operação', function () { pm.expect(String(jsonData.message).length).to.be.greaterThan(0); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1001,\n  \"username\": \"{{username}}\",\n  \"firstName\": \"{{userUpdatedFirstName}}\",\n  \"lastName\": \"Pi\",\n  \"email\": \"{{userUpdatedEmail}}\",\n  \"password\": \"{{password}}\",\n  \"phone\": \"11888888888\",\n  \"userStatus\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/user/{{username}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "{{username}}"]
+            },
+            "description": "Valida o endpoint PUT /user/{username}."
+          }
+        },
+        {
+          "name": "Login do usuário",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('User login - status code é 200', function () { pm.response.to.have.status(200); });",
+                  "const jsonData = pm.response.json();",
+                  "pm.test('User login - retorno contém sessão iniciada', function () { pm.expect(String(jsonData.message)).to.include('logged in user session'); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/login?username={{username}}&password={{password}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "login"],
+              "query": [
+                { "key": "username", "value": "{{username}}" },
+                { "key": "password", "value": "{{password}}" }
+              ]
+            },
+            "description": "Valida o endpoint GET /user/login."
+          }
+        },
+        {
+          "name": "Logout do usuário",
           "event": [
             {
               "listen": "test",
@@ -135,7 +647,33 @@
               "host": ["{{baseUrl}}"],
               "path": ["user", "logout"]
             },
-            "description": "Fecha um fluxo simples do grupo User com endpoint historicamente mais previsível na API pública."
+            "description": "Valida o endpoint GET /user/logout."
+          }
+        },
+        {
+          "name": "Excluir usuário",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('User delete - status code é 200', function () { pm.response.to.have.status(200); });",
+                  "const jsonData = pm.response.json();",
+                  "pm.test('User delete - resposta confirma exclusão', function () { pm.expect(String(jsonData.message)).to.eql(pm.collectionVariables.get('username')); });"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/user/{{username}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["user", "{{username}}"]
+            },
+            "description": "Valida o endpoint DELETE /user/{username}."
           }
         }
       ]
