@@ -125,7 +125,7 @@ Login → Inventário → Adicionar ao carrinho → Carrinho → Checkout → Da
 ### 1. Clonar e instalar
 
 ```bash
-git clone <url-do-repositorio>
+git clone https://github.com/lucazolvr/prova-qa.git
 cd prova-qa
 
 # Dependências API
