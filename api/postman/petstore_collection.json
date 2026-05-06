@@ -23,7 +23,7 @@
           "if (!pm.collectionVariables.get('runInitialized')) {",
           "  const runId = Date.now();",
           "  const petId = String(runId);",
-          "  const orderId = String(runId).slice(-9);",
+          "  const orderId = String(parseInt(String(runId).slice(-9)));",
           "  const username = `qa_user_${runId}`;",
           "  pm.collectionVariables.set('petId', petId);",
           "  pm.collectionVariables.set('orderId', orderId);",
